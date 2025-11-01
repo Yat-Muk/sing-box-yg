@@ -3666,6 +3666,8 @@ b=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[0].tls.reality.handsha
 c=$(cat /etc/s-box/vl_reality.txt | cut -d'=' -f5 | cut -d'&' -f1)
 echo $sbfiles | xargs -n1 sed -i "23s/$a/$ym_vl_re/"
 echo $sbfiles | xargs -n1 sed -i "27s/$b/$ym_vl_re/"
+echo $sbfiles | xargs -n1 sed -i "125s/$a/$ym_vl_re/"
+echo $sbfiles | xargs -n1 sed -i "129s/$b/$ym_vl_re/"
 restartsb
 blue "设置完毕，请回到主菜单进入选项9更新节点配置"
 elif [ "$menu" = "2" ]; then
