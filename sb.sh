@@ -360,6 +360,11 @@ readp "\n设置Tuic5主端口[1-65535] (回车跳过为10000-65535之间的随�
 chooseport
 port_tu=$port
 }
+anytlsport(){
+readp "\n设置AnyTLS主端口[1-65535] (回车跳过为10000-65535之间的随机端口)：" port
+chooseport
+port_anytls=$port
+}
 
 insport(){
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -369,7 +374,7 @@ yellow "2：自定义每个协议端口"
 readp "请输入【1-2】：" port
 if [ -z "$port" ] || [ "$port" = "1" ] ; then
 ports=()
-for i in {1..4}; do
+for i in {1..5}; do
 while true; do
 port=$(shuf -i 10000-65535 -n 1)
 if ! [[ " ${ports[@]} " =~ " $port " ]] && \
@@ -384,6 +389,7 @@ port_vm_ws=${ports[0]}
 port_vl_re=${ports[1]}
 port_hy2=${ports[2]}
 port_tu=${ports[3]}
+port_anytls=${ports[4]}
 if [[ $tlsyn == "true" ]]; then
 numbers=("2053" "2083" "2087" "2096" "8443")
 else
@@ -402,7 +408,7 @@ done
 echo
 blue "根据Vmess-ws协议是否启用TLS，随机指定支持CDN优选IP的标准端口：$port_vm_ws"
 else
-vlport && vmport && hy2port && tu5port
+vlport && vmport && hy2port && tu5port && anytlsport
 fi
 echo
 blue "各协议端口确认如下"
@@ -410,6 +416,7 @@ blue "Vless-reality端口：$port_vl_re"
 blue "Vmess-ws端口：$port_vm_ws"
 blue "Hysteria-2端口：$port_hy2"
 blue "Tuic-v5端口：$port_tu"
+blue "AnyTLS端口：$port_anytls"
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 green "四、自动生成各个协议统一的uuid (密码)"
 uuid=$(/etc/s-box/sing-box generate uuid)
@@ -522,6 +529,43 @@ cat > /etc/s-box/sb10.json <<EOF
                 ],
                 "certificate_path": "$certificatec_tuic",
                 "key_path": "$certificatep_tuic"
+            }
+        },
+        {
+            "type": "anytls",
+            "sniff": true,
+            "sniff_override_destination": true,
+            "tag": "anytls-sb",
+            "listen": "::",
+            "listen_port": ${port_anytls},
+            "users": [
+                {
+                    "password": "${uuid}"
+                }
+            ],
+            "padding_scheme": [
+                "stop=8",
+                "0=30-30",
+                "1=100-400",
+                "2=400-500,c,500-1000,c,500-1000,c,500-1000,c,500-1000",
+                "3=9-9,500-1000",
+                "4=500-1000",
+                "5=500-1000",
+                "6=500-1000",
+                "7=500-1000"
+            ],
+            "tls": {
+                "enabled": true,
+                "server_name": "${ym_vl_re}",
+                "reality": {
+                    "enabled": true,
+                    "handshake": {
+                        "server": "${ym_vl_re}",
+                        "server_port": 443
+                    },
+                    "private_key": "$private_key",
+                    "short_id": ["$short_id"]
+                }
             }
         }
 ],
@@ -766,6 +810,43 @@ cat > /etc/s-box/sb11.json <<EOF
                 ],
                 "certificate_path": "$certificatec_tuic",
                 "key_path": "$certificatep_tuic"
+            }
+        },
+        {
+            "type": "anytls",
+            "sniff": true,
+            "sniff_override_destination": true,
+            "tag": "anytls-sb",
+            "listen": "::",
+            "listen_port": ${port_anytls},
+            "users": [
+                {
+                    "password": "${uuid}"
+                }
+            ],
+            "padding_scheme": [
+                "stop=8",
+                "0=30-30",
+                "1=100-400",
+                "2=400-500,c,500-1000,c,500-1000,c,500-1000,c,500-1000",
+                "3=9-9,500-1000",
+                "4=500-1000",
+                "5=500-1000",
+                "6=500-1000",
+                "7=500-1000"
+            ],
+            "tls": {
+                "enabled": true,
+                "server_name": "${ym_vl_re}",
+                "reality": {
+                    "enabled": true,
+                    "handshake": {
+                        "server": "${ym_vl_re}",
+                        "server_port": 443
+                    },
+                    "private_key": "$private_key",
+                    "short_id": ["$short_id"]
+                }
             }
         }
 ],
@@ -1068,6 +1149,7 @@ cl_tu5_ip=$ym
 ins=0
 tu5_ins=false
 fi
+anytls_port=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[4].listen_port')
 }
 
 resvless(){
@@ -1169,6 +1251,23 @@ echo -e "${yellow}$tuic5_link${plain}"
 echo
 echo "二维码【v2rayn、nekobox、小火箭shadowrocket】"
 qrencode -o - -t ANSIUTF8 "$(cat /etc/s-box/tuic5.txt)"
+white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo
+}
+
+resanytls(){
+echo
+white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+# AnyTLS-Reality 格式: anytls://password@server:port?sni=sni&pbk=public_key&sid=short_id&utls=chrome#name
+anytls_link="anytls://$uuid@$server_ip:$anytls_port?sni=$vl_name&pbk=$public_key&sid=$short_id&utls=chrome&fp=chrome#anytls-$hostname"
+echo "$anytls_link" > /etc/s-box/anytls.txt
+red "🚀【 AnyTLS-Reality 】节点信息如下：" && sleep 2
+echo
+echo "分享链接【nekobox、SFA、SFI】"
+echo -e "${yellow}$anytls_link${plain}"
+echo
+echo "二维码【nekobox、SFA、SFI】"
+qrencode -o - -t ANSIUTF8 "$(cat /etc/s-box/anytls.txt)"
 white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo
 }
@@ -1281,6 +1380,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "vmess-$hostname",
         "hy2-$hostname",
         "tuic5-$hostname",
+        "anytls-$hostname",
 "vmess-tls-argo固定-$hostname",
 "vmess-argo固定-$hostname",
 "vmess-tls-argo临时-$hostname",
@@ -1370,6 +1470,26 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "alpn": [
                     "h3"
                 ]
+            }
+        },
+        {
+            "type": "anytls",
+            "tag": "anytls-$hostname",
+            "server": "$server_ipcl",
+            "server_port": $anytls_port,
+            "password": "$uuid",
+            "tls": {
+                "enabled": true,
+                "server_name": "$vl_name",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "$public_key",
+                    "short_id": "$short_id"
+                }
             }
         },
 {
@@ -1492,6 +1612,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "vmess-$hostname",
         "hy2-$hostname",
         "tuic5-$hostname",
+        "anytls-$hostname",
 "vmess-tls-argo固定-$hostname",
 "vmess-argo固定-$hostname",
 "vmess-tls-argo临时-$hostname",
@@ -1889,6 +2010,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "vmess-$hostname",
         "hy2-$hostname",
         "tuic5-$hostname",
+        "anytls-$hostname",
 "vmess-tls-argo临时-$hostname",
 "vmess-argo临时-$hostname"
       ]
@@ -1978,6 +2100,26 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 ]
             }
         },
+        {
+            "type": "anytls",
+            "tag": "anytls-$hostname",
+            "server": "$server_ipcl",
+            "server_port": $anytls_port,
+            "password": "$uuid",
+            "tls": {
+                "enabled": true,
+                "server_name": "$vl_name",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "$public_key",
+                    "short_id": "$short_id"
+                }
+            }
+        },
 {
             "server": "$vmadd_argo",
             "server_port": 8443,
@@ -2044,6 +2186,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "vmess-$hostname",
         "hy2-$hostname",
         "tuic5-$hostname",
+        "anytls-$hostname",
 "vmess-tls-argo临时-$hostname",
 "vmess-argo临时-$hostname"
       ],
@@ -2407,6 +2550,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "vmess-$hostname",
         "hy2-$hostname",
         "tuic5-$hostname",
+        "anytls-$hostname",
 "vmess-tls-argo固定-$hostname",
 "vmess-argo固定-$hostname"
       ]
@@ -2496,6 +2640,26 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 ]
             }
         },
+        {
+            "type": "anytls",
+            "tag": "anytls-$hostname",
+            "server": "$server_ipcl",
+            "server_port": $anytls_port,
+            "password": "$uuid",
+            "tls": {
+                "enabled": true,
+                "server_name": "$vl_name",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "$public_key",
+                    "short_id": "$short_id"
+                }
+            }
+        },
 {
             "server": "$vmadd_argo",
             "server_port": 8443,
@@ -2562,6 +2726,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "vmess-$hostname",
         "hy2-$hostname",
         "tuic5-$hostname",
+        "anytls-$hostname",
 "vmess-tls-argo固定-$hostname",
 "vmess-argo固定-$hostname"
       ],
@@ -2923,6 +3088,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "vmess-$hostname",
         "hy2-$hostname",
         "tuic5-$hostname"
+        "anytls-$hostname",
       ]
     },
     {
@@ -3010,6 +3176,26 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 ]
             }
         },
+        {
+            "type": "anytls",
+            "tag": "anytls-$hostname",
+            "server": "$server_ipcl",
+            "server_port": $anytls_port,
+            "password": "$uuid",
+            "tls": {
+                "enabled": true,
+                "server_name": "$vl_name",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "$public_key",
+                    "short_id": "$short_id"
+                }
+            }
+        },
     {
       "tag": "direct",
       "type": "direct"
@@ -3022,6 +3208,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "vmess-$hostname",
         "hy2-$hostname",
         "tuic5-$hostname"
+        "anytls-$hostname",
       ],
       "url": "https://www.gstatic.com/generate_204",
       "interval": "1m",
@@ -3426,7 +3613,7 @@ inssbjsonser
 sbservice
 sbactive
 #curl -sL https://gitlab.com/rwkgyg/sing-box-yg/-/raw/main/version/version | awk -F "更新内容" '{print $1}' | head -n 1 > /etc/s-box/v
-curl -sL https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/version | awk -F "更新内容" '{print $1}' | head -n 1 > /etc/s-box/v
+curl -sL https://raw.githubusercontent.com/yat-muk/sing-box-yg/main/version | awk -F "更新内容" '{print $1}' | head -n 1 > /etc/s-box/v
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 lnsb && blue "Sing-box-yg脚本安装成功，脚本快捷方式：sb" && cronsb
 echo
@@ -3547,6 +3734,7 @@ hy2_port=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[2].listen_port'
 tu5_port=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[3].listen_port')
 hy2_ports=$(iptables -t nat -nL --line 2>/dev/null | grep -w "$hy2_port" | awk '{print $8}' | sed 's/dpts://; s/dpt://' | tr '\n' ',' | sed 's/,$//')
 tu5_ports=$(iptables -t nat -nL --line 2>/dev/null | grep -w "$tu5_port" | awk '{print $8}' | sed 's/dpts://; s/dpt://' | tr '\n' ',' | sed 's/,$//')
+anytls_port=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[4].listen_port')
 [[ -n $hy2_ports ]] && hy2zfport="$hy2_ports" || hy2zfport="未添加"
 [[ -n $tu5_ports ]] && tu5zfport="$tu5_ports" || tu5zfport="未添加"
 }
@@ -3619,8 +3807,9 @@ green "1：Vless-reality协议 ${yellow}端口:$vl_port${plain}"
 green "2：Vmess-ws协议 ${yellow}端口:$vm_port${plain}"
 green "3：Hysteria2协议 ${yellow}端口:$hy2_port  转发多端口: $hy2zfport${plain}"
 green "4：Tuic5协议 ${yellow}端口:$tu5_port  转发多端口: $tu5zfport${plain}"
+green "5：AnyTLS協議 ${yellow}端口:$anytls_port${plain}"
 green "0：返回上层"
-readp "请选择要变更端口的协议【0-4】：" menu
+readp "请选择要变更端口的协议【0-5】：" menu
 if [ "$menu" = "1" ]; then
 vlport
 echo $sbfiles | xargs -n1 sed -i "14s/$vl_port/$port_vl_re/"
@@ -3724,6 +3913,12 @@ fi
 else
 changeport
 fi
+elif [ "$menu" = "5" ]; then
+anytlsport
+echo $sbfiles | xargs -n1 sed -i "115s/$anytls_port/$port_anytls/"
+restartsb
+blue "AnyTLS端口更改完成，可选择9输出配置信息"
+echo
 else
 sb
 fi
@@ -4624,7 +4819,7 @@ rm /tmp/crontab.tmp
 
 lnsb(){
 rm -rf /usr/bin/sb
-curl -L -o /usr/bin/sb -# --retry 2 --insecure https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/sb.sh
+curl -L -o /usr/bin/sb -# --retry 2 --insecure https://raw.githubusercontent.com/yat-muk/sing-box-yg/main/sb.sh
 chmod +x /usr/bin/sb
 }
 
@@ -4633,7 +4828,7 @@ if [[ ! -f '/usr/bin/sb' ]]; then
 red "未正常安装Sing-box-yg" && exit
 fi
 lnsb
-curl -sL https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/version | awk -F "更新内容" '{print $1}' | head -n 1 > /etc/s-box/v
+curl -sL https://raw.githubusercontent.com/yat-muk/sing-box-yg/main/version | awk -F "更新内容" '{print $1}' | head -n 1 > /etc/s-box/v
 green "Sing-box-yg安装脚本升级成功" && sleep 5 && sb
 }
 
@@ -4712,7 +4907,7 @@ iptables -t nat -F PREROUTING >/dev/null 2>&1
 netfilter-persistent save >/dev/null 2>&1
 service iptables save >/dev/null 2>&1
 green "Sing-box卸载完成！"
-blue "欢迎继续使用Sing-box-yg脚本：bash <(curl -Ls https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/sb.sh)"
+blue "欢迎继续使用Sing-box-yg脚本：bash <(curl -Ls https://raw.githubusercontent.com/yat-muk/sing-box-yg/main/sb.sh)"
 echo
 }
 
@@ -4733,8 +4928,8 @@ fi
 }
 
 sbshare(){
-rm -rf /etc/s-box/jhdy.txt /etc/s-box/vl_reality.txt /etc/s-box/vm_ws_argols.txt /etc/s-box/vm_ws_argogd.txt /etc/s-box/vm_ws.txt /etc/s-box/vm_ws_tls.txt /etc/s-box/hy2.txt /etc/s-box/tuic5.txt
-result_vl_vm_hy_tu && resvless && resvmess && reshy2 && restu5
+rm -rf /etc/s-box/jhdy.txt /etc/s-box/vl_reality.txt /etc/s-box/vm_ws_argols.txt /etc/s-box/vm_ws_argogd.txt /etc/s-box/vm_ws.txt /etc/s-box/vm_ws_tls.txt /etc/s-box/hy2.txt /etc/s-box/tuic5.txt /etc/s-box/anytls.txt
+result_vl_vm_hy_tu && resvless && resvmess && reshy2 && restu5 && resanytls
 cat /etc/s-box/vl_reality.txt 2>/dev/null >> /etc/s-box/jhdy.txt
 cat /etc/s-box/vm_ws_argols.txt 2>/dev/null >> /etc/s-box/jhdy.txt
 cat /etc/s-box/vm_ws_argogd.txt 2>/dev/null >> /etc/s-box/jhdy.txt
@@ -4742,12 +4937,13 @@ cat /etc/s-box/vm_ws.txt 2>/dev/null >> /etc/s-box/jhdy.txt
 cat /etc/s-box/vm_ws_tls.txt 2>/dev/null >> /etc/s-box/jhdy.txt
 cat /etc/s-box/hy2.txt 2>/dev/null >> /etc/s-box/jhdy.txt
 cat /etc/s-box/tuic5.txt 2>/dev/null >> /etc/s-box/jhdy.txt
+cat /etc/s-box/anytls.txt 2>/dev/null >> /etc/s-box/jhdy.txt
 baseurl=$(base64 -w 0 < /etc/s-box/jhdy.txt 2>/dev/null)
 v2sub=$(cat /etc/s-box/jhdy.txt 2>/dev/null)
 echo "$v2sub" > /etc/s-box/jh_sub.txt
 echo
 white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-red "🚀【 四合一聚合订阅 】节点信息如下：" && sleep 2
+red "🚀【 五合一聚合订阅 】节点信息如下：" && sleep 2
 echo
 echo "分享链接"
 echo -e "${yellow}$baseurl${plain}"
@@ -4759,7 +4955,7 @@ sb_client
 clash_sb_share(){
 sbactive
 echo
-yellow "1：刷新并查看各协议分享链接、二维码、四合一聚合订阅"
+yellow "1：刷新并查看各协议分享链接、二维码、五合一聚合订阅"
 yellow "2：刷新并查看Clash-Meta、Sing-box客户端SFA/SFI/SFW三合一配置、Gitlab私有订阅链接"
 yellow "3：刷新并查看Hysteria2、Tuic5的V2rayN客户端自定义配置"
 yellow "4：推送最新节点配置信息(选项1+选项2)到Telegram通知"
@@ -4782,7 +4978,7 @@ echo
 white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo
 white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-red "🚀【 vless-reality、vmess-ws、Hysteria2、Tuic5 】SFA/SFI/SFW配置文件显示如下："
+red "🚀【 vless-reality、vmess-ws、Hysteria2、Tuic5、AnyTLS 】SFA/SFI/SFW配置文件显示如下："
 red "安卓SFA、苹果SFI，win电脑官方文件包SFW请到甬哥Github项目自行下载，"
 red "文件目录 /etc/s-box/sing_box_client.json ，复制自建以json文件格式为准" && sleep 2
 echo
@@ -4863,6 +5059,8 @@ hy2_sniname=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[2].tls.key_p
 [[ "$hy2_sniname" = '/etc/s-box/private.key' ]] && hy2_zs="自签证书" || hy2_zs="域名证书"
 tu5_sniname=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[3].tls.key_path')
 [[ "$tu5_sniname" = '/etc/s-box/private.key' ]] && tu5_zs="自签证书" || tu5_zs="域名证书"
+anytls_port=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[4].listen_port')
+
 echo -e "Sing-box节点关键信息、已分流域名情况如下："
 echo -e "🚀【 Vless-reality 】${yellow}端口:$vl_port  Reality域名证书伪装地址：$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[0].tls.server_name')${plain}"
 if [[ "$tls" = "false" ]]; then
@@ -4872,6 +5070,7 @@ echo -e "🚀【 Vmess-ws-tls  】${yellow}端口:$vm_port   证书形式:$vm_zs
 fi
 echo -e "🚀【  Hysteria-2   】${yellow}端口:$hy2_port  证书形式:$hy2_zs  转发多端口: $hy2zfport${plain}"
 echo -e "🚀【    Tuic-v5    】${yellow}端口:$tu5_port  证书形式:$tu5_zs  转发多端口: $tu5zfport${plain}"
+echo -e "🚀【 AnyTLS-Reality 】${yellow}端口:$anytls_port  Reality狀態:共用Vless設置${plain}"
 if [ "$argoym" = "已开启" ]; then
 echo -e "Vmess-UUID：${yellow}$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[0].users[0].uuid')${plain}"
 echo -e "Vmess-Path：${yellow}$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[1].transport.path')${plain}"
@@ -4951,7 +5150,7 @@ case $(uname -m) in
 aarch64) cpu=arm64;;
 x86_64) cpu=amd64;;
 esac
-curl -L -o /etc/s-box/sbwpph -# --retry 2 --insecure https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/sbwpph_$cpu
+curl -L -o /etc/s-box/sbwpph -# --retry 2 --insecure https://raw.githubusercontent.com/yat-muk/sing-box-yg/main/sbwpph_$cpu
 chmod +x /etc/s-box/sbwpph
 fi
 if [[ -n $(ps -e | grep sbwpph) ]]; then
@@ -5084,7 +5283,7 @@ blue "sing-box-yg脚本视频教程：https://www.youtube.com/playlist?list=PLMg
 echo
 blue "sing-box-yg脚本博客说明：http://ygkkk.blogspot.com/2023/10/sing-box-yg.html"
 echo
-blue "sing-box-yg脚本项目地址：https://github.com/yonggekkk/sing-box-yg"
+blue "sing-box-yg脚本项目地址：https://github.com/yat-muk/sing-box-yg"
 echo
 blue "推荐甬哥新品：ArgoSB一键无交互小钢炮脚本"
 blue "支持：AnyTLS、Any-reality、Vless-xhttp-reality、Vless-reality-vision、Shadowsocks-2022、Hysteria2、Tuic、Vmess-ws、Argo临时/固定隧道"
@@ -5101,11 +5300,11 @@ echo -e "${bblue}     ░██        ░${plain}██    ░██ ██    
 echo -e "${bblue}     ░██ ${plain}        ░██    ░░██        ░██ ░██       ░${red}██ ░██       ░██ ░██ ${plain}  "
 echo -e "${bblue}     ░█${plain}█          ░██ ██ ██         ░██  ░░${red}██     ░██  ░░██     ░██  ░░██ ${plain}  "
 white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" 
-white "甬哥Github项目  ：github.com/yonggekkk"
+white "Github项目  ：github.com/yat-muk"
 white "甬哥Blogger博客 ：ygkkk.blogspot.com"
 white "甬哥YouTube频道 ：www.youtube.com/@ygkkk"
 white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" 
-white "Vless-reality-vision、Vmess-ws(tls)+Argo、Hysteria-2、Tuic-v5 四协议共存脚本"
+white "Vless-reality-vision、Vmess-ws(tls)+Argo、Hysteria-2、Tuic-v5、AnyTLS 五协议共存脚本"
 white "脚本快捷方式：sb"
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 green " 1. 一键安装 Sing-box" 
@@ -5131,14 +5330,14 @@ white "-------------------------------------------------------------------------
 green " 0. 退出脚本"
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 insV=$(cat /etc/s-box/v 2>/dev/null)
-latestV=$(curl -sL https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/version | awk -F "更新内容" '{print $1}' | head -n 1)
+latestV=$(curl -sL https://raw.githubusercontent.com/yat-muk/sing-box-yg/main/version | awk -F "更新内容" '{print $1}' | head -n 1)
 if [ -f /etc/s-box/v ]; then
 if [ "$insV" = "$latestV" ]; then
 echo -e "当前 Sing-box-yg 脚本最新版：${bblue}${insV}${plain} (已安装)"
 else
 echo -e "当前 Sing-box-yg 脚本版本号：${bblue}${insV}${plain}"
 echo -e "检测到最新 Sing-box-yg 脚本版本号：${yellow}${latestV}${plain} (可选择7进行更新)"
-echo -e "${yellow}$(curl -sL https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/version)${plain}"
+echo -e "${yellow}$(curl -sL https://raw.githubusercontent.com/yat-muk/sing-box-yg/main/version)${plain}"
 fi
 else
 echo -e "当前 Sing-box-yg 脚本版本号：${bblue}${latestV}${plain}"
