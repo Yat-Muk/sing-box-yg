@@ -1478,6 +1478,9 @@ cat > /etc/s-box/sing_box_client.json <<EOF
             "server": "$server_ipcl",
             "server_port": $anytls_port,
             "password": "$uuid",
+            "idle_session_check_interval": "30s",
+            "idle_session_timeout": "30s",
+            "min_idle_session": 5,
             "tls": {
                 "enabled": true,
                 "server_name": "$vl_name",
@@ -2106,6 +2109,9 @@ cat > /etc/s-box/sing_box_client.json <<EOF
             "server": "$server_ipcl",
             "server_port": $anytls_port,
             "password": "$uuid",
+            "idle_session_check_interval": "30s",
+            "idle_session_timeout": "30s",
+            "min_idle_session": 5,
             "tls": {
                 "enabled": true,
                 "server_name": "$vl_name",
@@ -2646,6 +2652,9 @@ cat > /etc/s-box/sing_box_client.json <<EOF
             "server": "$server_ipcl",
             "server_port": $anytls_port,
             "password": "$uuid",
+            "idle_session_check_interval": "30s",
+            "idle_session_timeout": "30s",
+            "min_idle_session": 5,
             "tls": {
                 "enabled": true,
                 "server_name": "$vl_name",
@@ -3182,6 +3191,9 @@ cat > /etc/s-box/sing_box_client.json <<EOF
             "server": "$server_ipcl",
             "server_port": $anytls_port,
             "password": "$uuid",
+            "idle_session_check_interval": "30s",
+            "idle_session_timeout": "30s",
+            "min_idle_session": 5,
             "tls": {
                 "enabled": true,
                 "server_name": "$vl_name",
