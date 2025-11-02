@@ -540,6 +540,7 @@ cat > /etc/s-box/sb10.json <<EOF
             "listen_port": ${port_anytls},
             "users": [
                 {
+                    "name": "anytls_user",
                     "password": "${uuid}"
                 }
             ],
@@ -821,6 +822,7 @@ cat > /etc/s-box/sb11.json <<EOF
             "listen_port": ${port_anytls},
             "users": [
                 {
+                    "name": "anytls_user",
                     "password": "${uuid}"
                 }
             ],
@@ -5076,14 +5078,14 @@ tu5_sniname=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[3].tls.key_p
 anytls_port=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[4].listen_port')
 
 echo -e "Sing-box节点关键信息、已分流域名情况如下："
-echo -e "🚀【 Vless-reality 】${yellow}端口:$vl_port  Reality域名证书伪装地址：$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[0].tls.server_name')${plain}"
+echo -e "🚀【  Vless-reality 】${yellow}端口:$vl_port  Reality域名证书伪装地址：$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[0].tls.server_name')${plain}"
 if [[ "$tls" = "false" ]]; then
-echo -e "🚀【   Vmess-ws    】${yellow}端口:$vm_port   证书形式:$vm_zs   Argo状态:$argoym${plain}"
+echo -e "🚀【    Vmess-ws    】${yellow}端口:$vm_port   证书形式:$vm_zs   Argo状态:$argoym${plain}"
 else
-echo -e "🚀【 Vmess-ws-tls  】${yellow}端口:$vm_port   证书形式:$vm_zs   Argo状态:$argoym${plain}"
+echo -e "🚀【  Vmess-ws-tls  】${yellow}端口:$vm_port   证书形式:$vm_zs   Argo状态:$argoym${plain}"
 fi
-echo -e "🚀【  Hysteria-2   】${yellow}端口:$hy2_port  证书形式:$hy2_zs  转发多端口: $hy2zfport${plain}"
-echo -e "🚀【    Tuic-v5    】${yellow}端口:$tu5_port  证书形式:$tu5_zs  转发多端口: $tu5zfport${plain}"
+echo -e "🚀【   Hysteria-2   】${yellow}端口:$hy2_port  证书形式:$hy2_zs  转发多端口: $hy2zfport${plain}"
+echo -e "🚀【    Tuic-v5     】${yellow}端口:$tu5_port  证书形式:$tu5_zs  转发多端口: $tu5zfport${plain}"
 echo -e "🚀【 AnyTLS-Reality 】${yellow}端口:$anytls_port  Reality狀態:共用Vless設置${plain}"
 if [ "$argoym" = "已开启" ]; then
 echo -e "Vmess-UUID：${yellow}$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[0].users[0].uuid')${plain}"
