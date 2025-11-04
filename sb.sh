@@ -5298,10 +5298,10 @@ echo
 
 clear
 white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" 
-blue "Github项目  ：github.com/yat-muk"
+echo "Github项目  ：github.com/yat-muk"
 white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" 
-blue "Vless-reality-vision、Vmess-ws(tls)+Argo、Hysteria-2、Tuic-v5、AnyTLS 五协议共存脚本"
-blue "脚本快捷方式：sb"
+echo "Vless-reality-vision、Vmess-ws(tls)+Argo、Hysteria-2、Tuic-v5、AnyTLS 五协议共存脚本"
+echo "脚本快捷方式：sb"
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 green " 1. 一键安装 Sing-box" 
 green " 2. 删除卸载 Sing-box"
