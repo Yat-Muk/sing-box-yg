@@ -533,8 +533,6 @@ cat > /etc/s-box/sb10.json <<EOF
         },
         {
             "type": "anytls",
-            "sniff": true,
-            "sniff_override_destination": true,
             "tag": "anytls-sb",
             "listen": "::",
             "listen_port": ${port_anytls},
@@ -815,8 +813,6 @@ cat > /etc/s-box/sb11.json <<EOF
         },
         {
             "type": "anytls",
-            "sniff": true,
-            "sniff_override_destination": true,
             "tag": "anytls-sb",
             "listen": "::",
             "listen_port": ${port_anytls},
