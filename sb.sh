@@ -1789,6 +1789,17 @@ proxies:
   sni: $tu5_name                                
   skip-cert-verify: $tu5_ins
 
+- name: anytls-$hostname
+  type: anytls
+  server: $server_ipcl
+  port: $anytls_port
+  password: $uuid
+  sni: $vl_name
+  client-fingerprint: chrome
+  reality-opts:
+    public-key: $public_key
+    short-id: $short_id
+
 - name: vmess-tls-argo固定-$hostname                         
   type: vmess
   server: $vmadd_argo                        
@@ -1865,6 +1876,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
     - vmess-tls-argo固定-$hostname
     - vmess-argo固定-$hostname
     - vmess-tls-argo临时-$hostname
@@ -1880,6 +1892,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
     - vmess-tls-argo固定-$hostname
     - vmess-argo固定-$hostname
     - vmess-tls-argo临时-$hostname
@@ -1895,6 +1908,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
     - vmess-tls-argo固定-$hostname
     - vmess-argo固定-$hostname
     - vmess-tls-argo临时-$hostname
@@ -2364,13 +2378,16 @@ proxies:
   sni: $tu5_name                                
   skip-cert-verify: $tu5_ins
 
-
-
-
-
-
-
-
+- name: anytls-$hostname
+  type: anytls
+  server: $server_ipcl
+  port: $anytls_port
+  password: $uuid
+  sni: $vl_name
+  client-fingerprint: chrome
+  reality-opts:
+    public-key: $public_key
+    short-id: $short_id
 
 - name: vmess-tls-argo临时-$hostname                         
   type: vmess
@@ -2415,6 +2432,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
     - vmess-tls-argo临时-$hostname
     - vmess-argo临时-$hostname
 
@@ -2428,6 +2446,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
     - vmess-tls-argo临时-$hostname
     - vmess-argo临时-$hostname
     
@@ -2441,6 +2460,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
     - vmess-tls-argo临时-$hostname
     - vmess-argo临时-$hostname
 rules:
@@ -2907,11 +2927,16 @@ proxies:
   sni: $tu5_name                                
   skip-cert-verify: $tu5_ins
 
-
-
-
-
-
+- name: anytls-$hostname
+  type: anytls
+  server: $server_ipcl
+  port: $anytls_port
+  password: $uuid
+  sni: $vl_name
+  client-fingerprint: chrome
+  reality-opts:
+    public-key: $public_key
+    short-id: $short_id
 
 - name: vmess-tls-argo固定-$hostname                         
   type: vmess
@@ -2956,6 +2981,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
     - vmess-tls-argo固定-$hostname
     - vmess-argo固定-$hostname
 
@@ -2969,6 +2995,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
     - vmess-tls-argo固定-$hostname
     - vmess-argo固定-$hostname
     
@@ -2982,6 +3009,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
     - vmess-tls-argo固定-$hostname
     - vmess-argo固定-$hostname
 rules:
@@ -3365,10 +3393,6 @@ proxies:
     headers:
       Host: $vm_name                     
 
-
-
-
-
 - name: hysteria2-$hostname                            
   type: hysteria2                                      
   server: $cl_hy2_ip                               
@@ -3394,6 +3418,17 @@ proxies:
   sni: $tu5_name                                
   skip-cert-verify: $tu5_ins
 
+- name: anytls-$hostname
+  type: anytls
+  server: $server_ipcl
+  port: $anytls_port
+  password: $uuid
+  sni: $vl_name
+  client-fingerprint: chrome
+  reality-opts:
+    public-key: $public_key
+    short-id: $short_id
+
 proxy-groups:
 - name: 负载均衡
   type: load-balance
@@ -3405,6 +3440,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
 
 - name: 自动选择
   type: url-test
@@ -3416,6 +3452,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
     
 - name: 🌍选择代理节点
   type: select
@@ -3427,6 +3464,7 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
+    - anytls-$hostname
 rules:
   - GEOIP,LAN,DIRECT
   - GEOIP,CN,DIRECT
