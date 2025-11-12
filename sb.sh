@@ -4029,15 +4029,13 @@ chip(){
 rpip=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[0].domain_strategy')
 [[ "$sbnh" == "1.10" ]] && num=10 || num=11
 
-# 
+#
 # ！！！這是關鍵修復！！！
-#
-# 我們不能只替換 $rpip (值)，我們必須替換 "key": "value"
-#
-# 修正 sb10.json (第 148 行)
+# 
+# 修正 sb10.json (使用正確行號 148)
 sed -i "148s/\"domain_strategy\": \"$rpip\"/\"domain_strategy\": \"$rrpip\"/g" /etc/s-box/sb10.json
-# 修正 sb11.json (第 185 行)
-sed -i "185s/\"domain_strategy\": \"$rpip\"/\"domain_strategy\": \"$rrpip\"/g" /etc/s-box/sb11.json
+# 修正 sb11.json (使用正確行號 181)
+sed -i "181s/\"domain_strategy\": \"$rpip\"/\"domain_strategy\": \"$rrpip\"/g" /etc/s-box/sb11.json
 
 # 檢查 sed 是否成功
 # 檢查 sb10.json
@@ -4048,7 +4046,7 @@ check2=$(grep "\"domain_strategy\": \"$rrpip\"" /etc/s-box/sb11.json)
 if [[ -z "$check1" || -z "$check2" ]]; then
     red "sed 替換失敗！腳本錯誤。"
     red "請檢查 /etc/s-box/sb10.json 的第 148 行"
-    red "和 /etc/s-box/sb11.json 的第 185 行"
+    red "和 /etc/s-box/sb11.json 的第 181 行"
     red "是否為 \"domain_strategy\": \"$rpip\""
     readp "按任意鍵返回..." key
     sb
