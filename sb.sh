@@ -4025,54 +4025,45 @@ fi
 changeip(){
 v4v6
 chip(){
-    # 獲取當前值 (例如 "prefer_ipv4")
-    rpip=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[0].domain_strategy')
+    # rpip 變數不再需要，jq 可以直接修改
     [[ "$sbnh" == "1.10" ]] && num=10 || num=11
 
-    # === 動態行號修復 v3 (不再使用硬編碼行號) ===
+    # === JQ 修復 (不再使用 sed 或行號) ===
     
-    # 1. 查找 sb10.json
-    # 獲取 "type":"direct" 的行號 (這是 outbounds 數組的第一個對象)
-    local line_type_10=$(grep -n '"type": "direct"' /etc/s-box/sb10.json | head -n 1 | cut -d: -f1)
-    if [[ -z "$line_type_10" ]]; then
-        red "錯誤：無法在 sb10.json 中定位 '\"type\": \"direct\"'。" && return 1
-    fi
+    # 1. 修正 sb10.json
+    # 使用 jq 尋找 .outbounds 數組中 "tag" == "direct" 的對象，並將其 "domain_strategy" 設置為新的 $rrpip 值
+    jq '(.outbounds[] | select(.tag == "direct") | .domain_strategy) = "'"$rrpip"'"' /etc/s-box/sb10.json > /etc/s-box/sb10.json.tmp
     
-    # 目標行是 "type":"direct" 之後的第 2 行 (即 "domain_strategy")
-    local target_line_10=$((line_type_10 + 2))
-
-    # 2. 查找 sb11.json
-    local line_type_11=$(grep -n '"type": "direct"' /etc/s-box/sb11.json | head -n 1 | cut -d: -f1)
-    if [[ -z "$line_type_11" ]]; then
-        red "錯誤：無法在 sb11.json 中定位 '\"type\": \"direct\"'。" && return 1
-    fi
-    
-    # 目標行是 "type":"direct" 之後的第 2 行 (即 "domain_strategy")
-    local target_line_11=$((line_type_11 + 2))
-
-    # 3. 執行替換
-    sed -i "${target_line_10}s/\"domain_strategy\": \"$rpip\"/\"domain_strategy\": \"$rrpip\"/g" /etc/s-box/sb10.json
-    sed -i "${target_line_11}s/\"domain_strategy\": \"$rpip\"/\"domain_strategy\": \"$rrpip\"/g" /etc/s-box/sb11.json
-
-    # 4. 檢查
-    local check1=$(grep "\"domain_strategy\": \"$rrpip\"" /etc/s-box/sb10.json)
-    local check2=$(grep "\"domain_strategy\": \"$rrpip\"" /etc/s-box/sb11.json)
-
-    if [[ -z "$check1" || -z "$check2" ]]; then
-        red "sed 替換失敗！腳本錯誤。"
-        red "自動定位 sb10.json 行號為: $target_line_10"
-        red "自動定位 sb11.json 行號為: $target_line_11"
-        red "請檢查這兩行是否為 \"domain_strategy\": \"$rpip\""
-        red "如果行號不對，您的 sb.sh 模板可能已被修改。"
+    # 檢查 jq 是否成功執行
+    if [[ $? -ne 0 || ! -s /etc/s-box/sb10.json.tmp ]]; then
+        red "jq 處理 /etc/s-box/sb10.json 失敗！"
+        red "請確保 jq 已正確安裝。"
+        rm -f /etc/s-box/sb10.json.tmp
         readp "按任意鍵返回..." key
         sb
-        return
+        return 1
     fi
+    # 替換原檔案
+    mv /etc/s-box/sb10.json.tmp /etc/s-box/sb10.json
+
+    # 2. 修正 sb11.json
+    jq '(.outbounds[] | select(.tag == "direct") | .domain_strategy) = "'"$rrpip"'"' /etc/s-box/sb11.json > /etc/s-box/sb11.json.tmp
     
+    if [[ $? -ne 0 || ! -s /etc/s-box/sb11.json.tmp ]]; then
+        red "jq 處理 /etc/s-box/sb11.json 失敗！"
+        red "請確保 jq 已正確安裝。"
+        rm -f /etc/s-box/sb11.json.tmp
+        readp "按任意鍵返回..." key
+        sb
+        return 1
+    fi
+    mv /etc/s-box/sb11.json.tmp /etc/s-box/sb11.json
+
+    # 3. 應用更改
     rm -rf /etc/s-box/sb.json
     cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
     restartsb
-    }
+}
 readp "1. IPV4優先\n2. IPV6優先\n3. 僅IPV4\n4. 僅IPV6\n请选择：" choose
 if [[ $choose == "1" && -n $v4 ]]; then
 rrpip="prefer_ipv4" && chip && v4_6="IPV4優先($v4)"
