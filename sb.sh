@@ -1481,7 +1481,9 @@ cat > /etc/s-box/sing_box_client.json <<EOF
             "min_idle_session": 5,
             "tls": {
                 "enabled": true,
+                "disable_sni": false,
                 "server_name": "$vl_name",
+                "insecure": false,
                 "utls": {
                     "enabled": true,
                     "fingerprint": "chrome"
@@ -1892,8 +1894,8 @@ proxy-groups:
     - vmess-ws-$hostname
     - hysteria2-$hostname
     - tuic5-$hostname
-    - anytls-$hostname
     - vmess-tls-argo固定-$hostname
+    - anytls-$hostname
     - vmess-argo固定-$hostname
     - vmess-tls-argo临时-$hostname
     - vmess-argo临时-$hostname
@@ -2126,7 +2128,9 @@ cat > /etc/s-box/sing_box_client.json <<EOF
             "min_idle_session": 5,
             "tls": {
                 "enabled": true,
+                "disable_sni": false,
                 "server_name": "$vl_name",
+                "insecure": false,
                 "utls": {
                     "enabled": true,
                     "fingerprint": "chrome"
@@ -2675,7 +2679,9 @@ cat > /etc/s-box/sing_box_client.json <<EOF
             "min_idle_session": 5,
             "tls": {
                 "enabled": true,
+                "disable_sni": false,
                 "server_name": "$vl_name",
+                "insecure": false,
                 "utls": {
                     "enabled": true,
                     "fingerprint": "chrome"
@@ -3222,7 +3228,9 @@ cat > /etc/s-box/sing_box_client.json <<EOF
             "min_idle_session": 5,
             "tls": {
                 "enabled": true,
+                "disable_sni": false,
                 "server_name": "$vl_name",
+                "insecure": false,
                 "utls": {
                     "enabled": true,
                     "fingerprint": "chrome"
@@ -3721,10 +3729,10 @@ else
 c_c='/etc/s-box/cert.pem'
 d_d='/etc/s-box/private.key'
 fi
-echo $sbfiles | xargs -n1 sed -i "55s#$a#$a_a#"
-echo $sbfiles | xargs -n1 sed -i "56s#$b#$b_b#"
-echo $sbfiles | xargs -n1 sed -i "57s#$c#$c_c#"
-echo $sbfiles | xargs -n1 sed -i "58s#$d#$d_d#"
+echo $sbfiles | xargs -n1 sed -i '/"tag": "vmess-sb"/,/"tls":/s/"enabled": .*/"enabled": '"$a_a"',/'
+echo $sbfiles | xargs -n1 sed -i '/"tag": "vmess-sb"/,/"tls":/s/"server_name": ".*"/"server_name": "'"$b_b"'"/'
+echo $sbfiles | xargs -n1 sed -i '/"tag": "vmess-sb"/,/"tls":/s#"certificate_path": ".*"#"certificate_path": "'"$c_c"'"#'
+echo $sbfiles | xargs -n1 sed -i '/"tag": "vmess-sb"/,/"tls":/s#"key_path": ".*"#"key_path": "'"$d_d"'"#'
 restartsb
 blue "设置完毕，请回到主菜单进入选项9更新节点配置"
 echo
@@ -3747,8 +3755,8 @@ else
 c_c='/etc/s-box/cert.pem'
 d_d='/etc/s-box/private.key'
 fi
-echo $sbfiles | xargs -n1 sed -i "79s#$c#$c_c#"
-echo $sbfiles | xargs -n1 sed -i "80s#$d#$d_d#"
+echo $sbfiles | xargs -n1 sed -i '/"tag": "hy2-sb"/,/"tls":/s#"certificate_path": ".*"#"certificate_path": "'"$c_c"'"#'
+echo $sbfiles | xargs -n1 sed -i '/"tag": "hy2-sb"/,/"tls":/s#"key_path": ".*"#"key_path": "'"$d_d"'"#'
 restartsb
 blue "设置完毕，请回到主菜单进入选项9更新节点配置"
 else
@@ -3765,8 +3773,8 @@ else
 c_c='/etc/s-box/cert.pem'
 d_d='/etc/s-box/private.key'
 fi
-echo $sbfiles | xargs -n1 sed -i "102s#$c#$c_c#"
-echo $sbfiles | xargs -n1 sed -i "103s#$d#$d_d#"
+echo $sbfiles | xargs -n1 sed -i '/"tag": "tuic5-sb"/,/"tls":/s#"certificate_path": ".*"#"certificate_path": "'"$c_c"'"#'
+echo $sbfiles | xargs -n1 sed -i '/"tag": "tuic5-sb"/,/"tls":/s#"key_path": ".*"#"key_path": "'"$d_d"'"#'
 restartsb
 blue "设置完毕，请回到主菜单进入选项9更新节点配置"
 else
@@ -3965,7 +3973,7 @@ changeport
 fi
 elif [ "$menu" = "5" ]; then
 anytlsport
-echo $sbfiles | xargs -n1 sed -i "115s/$anytls_port/$port_anytls/"
+echo $sbfiles | xargs -n1 sed -i '/"tag": "anytls-sb"/,/"users":/s/"listen_port": .*/"listen_port": '"$port_anytls"',/'
 restartsb
 blue "AnyTLS端口更改完成，可选择9输出配置信息"
 echo
@@ -4002,7 +4010,7 @@ if [ -z "$menu" ]; then
 echo
 else
 vmpath=$menu
-echo $sbfiles | xargs -n1 sed -i "50s#$oldvmpath#$vmpath#g"
+echo $sbfiles | xargs -n1 sed -i '/"tag": "vmess-sb"/,/"transport":/s#"path": ".*"#"path": "'"$vmpath"'"#'
 restartsb
 fi
 blue "已确认Vmess的path路径：$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[1].transport.path')"
@@ -4017,8 +4025,8 @@ v4v6
 chip(){
 rpip=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[0].domain_strategy')
 [[ "$sbnh" == "1.10" ]] && num=10 || num=11
-sed -i "111s/$rpip/$rrpip/g" /etc/s-box/sb10.json
-sed -i "134s/$rpip/$rrpip/g" /etc/s-box/sb11.json
+sed -i '153s/"domain_strategy": .*/"domain_strategy": "'"$rrpip"'",/' /etc/s-box/sb10.json
+sed -i '610s/"domain_strategy": .*/"domain_strategy": "'"$rrpip"'",/' /etc/s-box/sb11.json
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
 restartsb
@@ -4383,16 +4391,26 @@ blue "reserved值：$res"
 changewg(){
 [[ "$sbnh" == "1.10" ]] && num=10 || num=11
 if [[ "$sbnh" == "1.10" ]]; then
+# 修正: sb10.json (line 527)
 wgipv6=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[] | select(.type == "wireguard") | .local_address[1] | split("/")[0]')
+# 修正: sb10.json (line 529)
 wgprkey=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[] | select(.type == "wireguard") | .private_key')
-wgres=$(sed -n '165s/.*\[\(.*\)\].*/\1/p' /etc/s-box/sb.json)
+# 修正: sb10.json (line 530)
+wgres=$(sed -n '530s/.*\[\(.*\)\].*/\1/p' /etc/s-box/sb.json)
+# 修正: sb10.json (line 528)
 wgip=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[] | select(.type == "wireguard") | .server')
+# 修正: sb10.json (line 529)
 wgpo=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[] | select(.type == "wireguard") | .server_port')
 else
+# 修正: sb11.json (line 617)
 wgipv6=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.endpoints[] | .address[1] | split("/")[0]')
+# 修正: sb11.json (line 619)
 wgprkey=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.endpoints[] | .private_key')
-wgres=$(sed -n '125s/.*\[\(.*\)\].*/\1/p' /etc/s-box/sb.json)
+# 修正: sb11.json (line 629)
+wgres=$(sed -n '629s/.*\[\(.*\)\].*/\1/p' /etc/s-box/sb.json)
+# 修正: sb11.json (line 622)
 wgip=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.endpoints[] | .peers[].address')
+# 修正: sb11.json (line 623)
 wgpo=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.endpoints[] | .peers[].port')
 fi
 echo
@@ -4410,17 +4428,20 @@ green "最新随机生成普通warp-wireguard账户如下"
 warpwg
 echo
 readp "输入自定义Private_key：" menu
-sed -i "163s#$wgprkey#$menu#g" /etc/s-box/sb10.json
-sed -i "115s#$wgprkey#$menu#g" /etc/s-box/sb11.json
+# 修正: sb10.json (line 529), sb11.json (line 619)
+sed -i "529s#$wgprkey#$menu#g" /etc/s-box/sb10.json
+sed -i "619s#$wgprkey#$menu#g" /etc/s-box/sb11.json
 readp "输入自定义IPV6地址：" menu
-sed -i "161s/$wgipv6/$menu/g" /etc/s-box/sb10.json
-sed -i "113s/$wgipv6/$menu/g" /etc/s-box/sb11.json
-readp "输入自定义Reserved值 (格式：数字,数字,数字)，如无值则回车跳过：" menu
+# 修正: sb10.json (line 527), sb11.json (line 617)
+sed -i "527s/$wgipv6/$menu/g" /etc/s-box/sb10.json
+sed -i "617s/$wgipv6/$menu/g" /etc/s-box/sb11.json
+readp "输入自定义Reserved值 (格式：数字,数字,数字)，如无值则回车跳過：" menu
 if [ -z "$menu" ]; then
 menu=0,0,0
 fi
-sed -i "165s/$wgres/$menu/g" /etc/s-box/sb10.json
-sed -i "125s/$wgres/$menu/g" /etc/s-box/sb11.json
+# 修正: sb10.json (line 530), sb11.json (line 629)
+sed -i "530s/$wgres/$menu/g" /etc/s-box/sb10.json
+sed -i "629s/$wgres/$menu/g" /etc/s-box/sb11.json
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
 restartsb
@@ -4448,10 +4469,12 @@ nwgip=162.159.192.1
 nwgpo=2408
 fi
 fi
-sed -i "157s#$wgip#$nwgip#g" /etc/s-box/sb10.json
-sed -i "158s#$wgpo#$nwgpo#g" /etc/s-box/sb10.json
-sed -i "118s#$wgip#$nwgip#g" /etc/s-box/sb11.json
-sed -i "119s#$wgpo#$nwgpo#g" /etc/s-box/sb11.json
+# 修正: sb10.json (line 528, 529)
+sed -i "528s#$wgip#$nwgip#g" /etc/s-box/sb10.json
+sed -i "529s#$wgpo#$nwgpo#g" /etc/s-box/sb10.json
+# 修正: sb11.json (line 622, 623)
+sed -i "622s#$wgip#$nwgip#g" /etc/s-box/sb11.json
+sed -i "623s#$wgpo#$nwgpo#g" /etc/s-box/sb11.json
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
 restartsb
@@ -4619,7 +4642,8 @@ else
 w4flym="$(echo "$w4flym" | sed 's/ /","/g')"
 w4flym="\"$w4flym\""
 fi
-sed -i "184s/.*/$w4flym/" /etc/s-box/sb.json /etc/s-box/sb10.json
+# 修正: 'sb10.json' route.rules[1] domain_suffix (line 538)
+sed -i '538s/"domain_suffix": \[.*/"domain_suffix": \['"$w4flym"'\],/' /etc/s-box/sb.json /etc/s-box/sb10.json
 restartsb
 changef
 elif [ "$menu" = "2" ]; then
@@ -4630,7 +4654,8 @@ else
 w4flym="$(echo "$w4flym" | sed 's/ /","/g')"
 w4flym="\"$w4flym\""
 fi
-sed -i "187s/.*/$w4flym/" /etc/s-box/sb.json /etc/s-box/sb10.json
+# 修正: 'sb10.json' route.rules[1] geosite (line 541)
+sed -i '541s/"geosite": \[.*/"geosite": \['"$w4flym"'\],/' /etc/s-box/sb.json /etc/s-box/sb10.json
 restartsb
 changef
 else
@@ -4650,9 +4675,11 @@ else
 w6flym="$(echo "$w6flym" | sed 's/ /","/g')"
 w6flym="\"$w6flym\""
 fi
-sed -i "193s/.*/$w6flym/" /etc/s-box/sb10.json
-sed -i "169s/.*/$w6flym/" /etc/s-box/sb11.json
-sed -i "181s/.*/$w6flym/" /etc/s-box/sb11.json
+# 修正: 'sb10.json' route.rules[2] domain_suffix (line 544)
+sed -i '544s/"domain_suffix": \[.*/"domain_suffix": \['"$w6flym"'\],/' /etc/s-box/sb10.json
+# 修正: 'sb11.json' route.rules[2] domain_suffix (line 692) and rules[4] (line 708)
+sed -i '692s/"domain_suffix":\[.*/"domain_suffix":\["'"$w6flym"'"\],/' /etc/s-box/sb11.json
+sed -i '708s/"domain_suffix":\[.*/"domain_suffix":\["'"$w6flym"'"\],/' /etc/s-box/sb11.json
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
 restartsb
@@ -4666,7 +4693,8 @@ else
 w6flym="$(echo "$w6flym" | sed 's/ /","/g')"
 w6flym="\"$w6flym\""
 fi
-sed -i "196s/.*/$w6flym/" /etc/s-box/sb.json /etc/s-box/sb10.json
+# 修正: 'sb10.json' route.rules[2] geosite (line 547)
+sed -i '547s/"geosite": \[.*/"geosite": \['"$w6flym"'\],/' /etc/s-box/sb.json /etc/s-box/sb10.json
 restartsb
 changef
 else
@@ -4686,9 +4714,10 @@ else
 s4flym="$(echo "$s4flym" | sed 's/ /","/g')"
 s4flym="\"$s4flym\""
 fi
-sed -i "202s/.*/$s4flym/" /etc/s-box/sb10.json
-sed -i "162s/.*/$s4flym/" /etc/s-box/sb11.json
-sed -i "175s/.*/$s4flym/" /etc/s-box/sb11.json
+# 修正: 'sb10.json' route.rules[3] domain_suffix (line 550)
+sed -i '550s/"domain_suffix": \[.*/"domain_suffix": \['"$s4flym"'\],/' /etc/s-box/sb10.json
+# 修正: 'sb11.json' route.rules[3] domain_suffix (line 702)
+sed -i '702s/"domain_suffix":\[.*/"domain_suffix":\["'"$s4flym"'"\],/' /etc/s-box/sb11.json
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
 restartsb
@@ -4702,7 +4731,8 @@ else
 s4flym="$(echo "$s4flym" | sed 's/ /","/g')"
 s4flym="\"$s4flym\""
 fi
-sed -i "205s/.*/$s4flym/" /etc/s-box/sb.json /etc/s-box/sb10.json
+# 修正: 'sb10.json' route.rules[3] geosite (line 553)
+sed -i '553s/"geosite": \[.*/"geosite": \['"$s4flym"'\],/' /etc/s-box/sb.json /etc/s-box/sb10.json
 restartsb
 changef
 else
@@ -4723,7 +4753,8 @@ else
 s6flym="$(echo "$s6flym" | sed 's/ /","/g')"
 s6flym="\"$s6flym\""
 fi
-sed -i "211s/.*/$s6flym/" /etc/s-box/sb.json /etc/s-box/sb10.json
+# 修正: 'sb10.json' route.rules[4] domain_suffix (line 556)
+sed -i '556s/"domain_suffix": \[.*/"domain_suffix": \['"$s6flym"'\],/' /etc/s-box/sb.json /etc/s-box/sb10.json
 restartsb
 changef
 elif [ "$menu" = "2" ]; then
@@ -4734,7 +4765,8 @@ else
 s6flym="$(echo "$s6flym" | sed 's/ /","/g')"
 s6flym="\"$s6flym\""
 fi
-sed -i "214s/.*/$s6flym/" /etc/s-box/sb.json /etc/s-box/sb10.json
+# 修正: 'sb10.json' route.rules[4] geosite (line 559)
+sed -i '559s/"geosite": \[.*/"geosite": \['"$s6flym"'\],/' /etc/s-box/sb.json /etc/s-box/sb10.json
 restartsb
 changef
 else
@@ -4754,8 +4786,10 @@ else
 ad4flym="$(echo "$ad4flym" | sed 's/ /","/g')"
 ad4flym="\"$ad4flym\""
 fi
-sed -i "220s/.*/$ad4flym/" /etc/s-box/sb10.json
-sed -i "188s/.*/$ad4flym/" /etc/s-box/sb11.json
+# 修正: 'sb10.json' route.rules[5] domain_suffix (line 562)
+sed -i '562s/"domain_suffix": \[.*/"domain_suffix": \['"$ad4flym"'\],/' /etc/s-box/sb10.json
+# 修正: 'sb11.json' route.rules[5] domain_suffix (line 714)
+sed -i '714s/"domain_suffix":\[.*/"domain_suffix":\["'"$ad4flym"'"\]/' /etc/s-box/sb11.json
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
 restartsb
@@ -4769,7 +4803,8 @@ else
 ad4flym="$(echo "$ad4flym" | sed 's/ /","/g')"
 ad4flym="\"$ad4flym\""
 fi
-sed -i "223s/.*/$ad4flym/" /etc/s-box/sb.json /etc/s-box/sb10.json
+# 修正: 'sb10.json' route.rules[5] geosite (line 565)
+sed -i '565s/"geosite": \[.*/"geosite": \['"$ad4flym"'\],/' /etc/s-box/sb.json /etc/s-box/sb10.json
 restartsb
 changef
 else
@@ -4789,8 +4824,10 @@ else
 ad6flym="$(echo "$ad6flym" | sed 's/ /","/g')"
 ad6flym="\"$ad6flym\""
 fi
-sed -i "229s/.*/$ad6flym/" /etc/s-box/sb10.json
-sed -i "194s/.*/$ad6flym/" /etc/s-box/sb11.json
+# 修正: 'sb10.json' route.rules[6] domain_suffix (line 568)
+sed -i '568s/"domain_suffix": \[.*/"domain_suffix": \['"$ad6flym"'\],/' /etc/s-box/sb10.json
+# 修正: 'sb11.json' route.rules[6] domain_suffix (line 720)
+sed -i '720s/"domain_suffix":\[.*/"domain_suffix":\["'"$ad6flym"'"\]/' /etc/s-box/sb11.json
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
 restartsb
@@ -4804,7 +4841,8 @@ else
 ad6flym="$(echo "$ad6flym" | sed 's/ /","/g')"
 ad6flym="\"$ad6flym\""
 fi
-sed -i "232s/.*/$ad6flym/" /etc/s-box/sb.json /etc/s-box/sb10.json
+# 修正: 'sb10.json' route.rules[6] geosite (line 571)
+sed -i '571s/"geosite": \[.*/"geosite": \['"$ad6flym"'\],/' /etc/s-box/sb.json /etc/s-box/sb10.json
 restartsb
 changef
 else
@@ -5228,8 +5266,8 @@ done
 fi
 s5port=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[] | select(.type == "socks") | .server_port')
 [[ "$sbnh" == "1.10" ]] && num=10 || num=11
-sed -i "127s/$s5port/$port/g" /etc/s-box/sb10.json
-sed -i "150s/$s5port/$port/g" /etc/s-box/sb11.json
+sed -i '/"tag": "socks-out"/,/"version":/s/"server_port": .*/"server_port": '"$port"',/' /etc/s-box/sb10.json
+sed -i '/"tag": "socks-out"/,/"version":/s/"server_port": .*/"server_port": '"$port"',/' /etc/s-box/sb11.json
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
 restartsb
