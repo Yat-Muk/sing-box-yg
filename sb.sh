@@ -4029,8 +4029,8 @@ rpip=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[0].domain_strategy
 [[ "$sbnh" == "1.10" ]] && num=10 || num=11
 
 # 恢復使用原始代碼的行號替換邏輯，並更新為 sb.sh 的正確行號
-sed -i "170s/$rpip/$rrpip/g" /etc/s-box/sb10.json
-sed -i "236s/$rpip/$rrpip/g" /etc/s-box/sb11.json
+sed -i "148s/$rpip/$rrpip/g" /etc/s-box/sb10.json
+sed -i "185s/$rpip/$rrpip/g" /etc/s-box/sb11.json
 
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
