@@ -4025,8 +4025,8 @@ v4v6
 chip(){
 rpip=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[0].domain_strategy')
 [[ "$sbnh" == "1.10" ]] && num=10 || num=11
-sed -i '503s/"domain_strategy": .*/"domain_strategy": "'"$rrpip"'"/' /etc/s-box/sb10.json
-sed -i '644s/"domain_strategy": .*/"domain_strategy": "'"$rrpip"'"/' /etc/s-box/sb11.json
+sed -i '505s/"domain_strategy": .*/"domain_strategy": "'"$rrpip"'"/' /etc/s-box/sb10.json
+sed -i '671s/"domain_strategy": .*/"domain_strategy": "'"$rrpip"'"/' /etc/s-box/sb11.json
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
 restartsb
