@@ -141,8 +141,8 @@ fi
 fi
 
 v4v6(){
-v4=$(curl -s4m5 icanhazip.com -k)
-v6=$(curl -s6m5 icanhazip.com -k)
+    export v4=$(curl -s4m5 icanhazip.com -k)
+    export v6=$(curl -s6m5 icanhazip.com -k)
 }
 
 warpcheck(){
@@ -157,8 +157,10 @@ echo
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 yellow "检测到 纯IPV6 VPS，添加NAT64"
 echo -e "nameserver 2a00:1098:2b::1\nnameserver 2a00:1098:2c::1" > /etc/resolv.conf
+endip=2606:4700:d0::a29f:c101
 ipv=prefer_ipv6
 else
+endip=162.159.192.1
 ipv=prefer_ipv4
 fi
 if [ -n "$(curl -s6m5 icanhazip.com -k)" ]; then
@@ -4026,21 +4028,23 @@ chip(){
 rpip=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.outbounds[0].domain_strategy')
 [[ "$sbnh" == "1.10" ]] && num=10 || num=11
 
-echo $sbfiles | xargs -n1 sed -i '/"tag": "direct"/,/"domain_strategy":/s/\("domain_strategy": "\)[^"]*\(.*$\)/\1'"$rrpip"'\2/'
+# 恢復使用原始代碼的行號替換邏輯，並更新為 sb.sh 的正確行號
+sed -i "170s/$rpip/$rrpip/g" /etc/s-box/sb10.json
+sed -i "236s/$rpip/$rrpip/g" /etc/s-box/sb11.json
 
 rm -rf /etc/s-box/sb.json
 cp /etc/s-box/sb${num}.json /etc/s-box/sb.json
 restartsb
 }
-readp "1. IPV4优先\n2. IPV6优先\n3. 仅IPV4\n4. 仅IPV6\n请选择：" choose
+readp "1. IPV4優先\n2. IPV6優先\n3. 僅IPV4\n4. 僅IPV6\n请选择：" choose
 if [[ $choose == "1" && -n $v4 ]]; then
-rrpip="prefer_ipv4" && chip && v4_6="IPV4优先($v4)"
+rrpip="prefer_ipv4" && chip && v4_6="IPV4優先($v4)"
 elif [[ $choose == "2" && -n $v6 ]]; then
-rrpip="prefer_ipv6" && chip && v4_6="IPV6优先($v6)"
+rrpip="prefer_ipv6" && chip && v4_6="IPV6優先($v6)"
 elif [[ $choose == "3" && -n $v4 ]]; then
-rrpip="ipv4_only" && chip && v4_6="仅IPV4($v4)"
+rrpip="ipv4_only" && chip && v4_6="僅IPV4($v4)"
 elif [[ $choose == "4" && -n $v6 ]]; then
-rrpip="ipv6_only" && chip && v4_6="仅IPV6($v6)"
+rrpip="ipv6_only" && chip && v4_6="僅IPV6($v6)"
 else 
 red "当前不存在你选择的IPV4/IPV6地址，或者输入错误" && changeip
 fi
