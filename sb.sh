@@ -254,9 +254,9 @@ fi
 
 inscertificate(){
 ymzs(){
-ym_vl_re=apple.com
+ym_vl_re=www.apple.com
 echo
-blue "Vless-reality的SNI域名默認為 apple.com"
+blue "Vless-reality的SNI域名默認為 www.apple.com"
 blue "Vmess-ws將開啓TLS，Hysteria-2、Tuic-v5將使用 $(cat /root/ygkkkca/ca.log 2>/dev/null) 證書，並開啓SNI證書驗證"
 tlsyn=true
 ym_vm_ws=$(cat /root/ygkkkca/ca.log 2>/dev/null)
@@ -269,9 +269,9 @@ certificatep_tuic='/root/ygkkkca/private.key'
 }
 
 zqzs(){
-ym_vl_re=apple.com
+ym_vl_re=www.apple.com
 echo
-blue "Vless-reality的SNI域名默認為 apple.com"
+blue "Vless-reality的SNI域名默認為 www.apple.com"
 blue "Vmess-ws將關閉TLS，Hysteria-2、Tuic-v5將使用bing自簽證書，並關閉SNI證書驗證"
 tlsyn=false
 ym_vm_ws=www.bing.com
@@ -1155,7 +1155,7 @@ anytls_port=$(sed 's://.*::g' /etc/s-box/sb.json | jq -r '.inbounds[4].listen_po
 resvless(){
 echo
 white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-vl_link="vless://$uuid@$server_ip:$vl_port?encryption=none&flow=xtls-rprx-vision&security=reality&sni=$vl_name&fp=chrome&pbk=$public_key&sid=$short_id&type=tcp&headerType=none#vl-reality-$hostname"
+vl_link="vless://$uuid@$server_ip:$vl_port?encryption=none&flow=xtls-rprx-vision&security=reality&sni=$vl_name&fp=firefox&pbk=$public_key&sid=$short_id&type=tcp&headerType=none#vl-reality-$hostname"
 echo "$vl_link" > /etc/s-box/vl_reality.txt
 red "🚀【 vless-reality-vision 】節點信息如下：" && sleep 2
 echo
@@ -1258,8 +1258,8 @@ echo
 resanytls(){
 echo
 white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-# AnyTLS-Reality 格式: anytls://password@server:port?sni=sni&pbk=public_key&sid=short_id&utls=chrome#name
-anytls_link="anytls://$uuid@$server_ip:$anytls_port?sni=$vl_name&pbk=$public_key&sid=$short_id&utls=chrome&fp=chrome#anytls-$hostname"
+# AnyTLS-Reality 格式: anytls://password@server:port?sni=sni&pbk=public_key&sid=short_id&utls=firefox#name
+anytls_link="anytls://$uuid@$server_ip:$anytls_port?sni=$vl_name&pbk=$public_key&sid=$short_id&utls=firefox&fp=firefox#anytls-$hostname"
 echo "$anytls_link" > /etc/s-box/anytls.txt
 red "🚀【 AnyTLS-Reality 】節點信息如下：" && sleep 2
 echo
@@ -1399,7 +1399,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "server_name": "$vl_name",
         "utls": {
           "enabled": true,
-          "fingerprint": "chrome"
+          "fingerprint": "firefox"
         },
       "reality": {
           "enabled": true,
@@ -1418,7 +1418,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -1488,7 +1488,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 },
                 "reality": {
                     "enabled": true,
@@ -1507,7 +1507,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -1534,7 +1534,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -1561,7 +1561,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -1588,7 +1588,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -1714,7 +1714,7 @@ allow-lan: true
 mode: rule
 log-level: info
 unified-delay: true
-global-client-fingerprint: chrome
+global-client-fingerprint: firefox
 dns:
   enable: false
   listen: :53
@@ -1750,7 +1750,7 @@ proxies:
   reality-opts: 
     public-key: $public_key    
     short-id: $short_id                      
-  client-fingerprint: chrome                  
+  client-fingerprint: firefox                  
 
 - name: vmess-ws-$hostname                         
   type: vmess
@@ -1799,7 +1799,7 @@ proxies:
   port: $anytls_port
   password: $uuid
   sni: $vl_name
-  client-fingerprint: chrome
+  client-fingerprint: firefox
   reality-opts:
     public-key: $public_key
     short-id: $short_id
@@ -2046,7 +2046,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "server_name": "$vl_name",
         "utls": {
           "enabled": true,
-          "fingerprint": "chrome"
+          "fingerprint": "firefox"
         },
       "reality": {
           "enabled": true,
@@ -2065,7 +2065,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -2135,7 +2135,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 },
                 "reality": {
                     "enabled": true,
@@ -2154,7 +2154,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -2181,7 +2181,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -2305,7 +2305,7 @@ allow-lan: true
 mode: rule
 log-level: info
 unified-delay: true
-global-client-fingerprint: chrome
+global-client-fingerprint: firefox
 dns:
   enable: false
   listen: :53
@@ -2341,7 +2341,7 @@ proxies:
   reality-opts: 
     public-key: $public_key    
     short-id: $short_id                      
-  client-fingerprint: chrome                  
+  client-fingerprint: firefox                  
 
 - name: vmess-ws-$hostname                         
   type: vmess
@@ -2390,7 +2390,7 @@ proxies:
   port: $anytls_port
   password: $uuid
   sni: $vl_name
-  client-fingerprint: chrome
+  client-fingerprint: firefox
   reality-opts:
     public-key: $public_key
     short-id: $short_id
@@ -2597,7 +2597,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "server_name": "$vl_name",
         "utls": {
           "enabled": true,
-          "fingerprint": "chrome"
+          "fingerprint": "firefox"
         },
       "reality": {
           "enabled": true,
@@ -2616,7 +2616,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -2686,7 +2686,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 },
                 "reality": {
                     "enabled": true,
@@ -2705,7 +2705,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -2732,7 +2732,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -2856,7 +2856,7 @@ allow-lan: true
 mode: rule
 log-level: info
 unified-delay: true
-global-client-fingerprint: chrome
+global-client-fingerprint: firefox
 dns:
   enable: false
   listen: :53
@@ -2892,7 +2892,7 @@ proxies:
   reality-opts: 
     public-key: $public_key    
     short-id: $short_id                      
-  client-fingerprint: chrome                  
+  client-fingerprint: firefox                  
 
 - name: vmess-ws-$hostname                         
   type: vmess
@@ -2941,7 +2941,7 @@ proxies:
   port: $anytls_port
   password: $uuid
   sni: $vl_name
-  client-fingerprint: chrome
+  client-fingerprint: firefox
   reality-opts:
     public-key: $public_key
     short-id: $short_id
@@ -3146,7 +3146,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "server_name": "$vl_name",
         "utls": {
           "enabled": true,
-          "fingerprint": "chrome"
+          "fingerprint": "firefox"
         },
       "reality": {
           "enabled": true,
@@ -3165,7 +3165,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 }
             },
             "packet_encoding": "packetaddr",
@@ -3235,7 +3235,7 @@ cat > /etc/s-box/sing_box_client.json <<EOF
                 "insecure": false,
                 "utls": {
                     "enabled": true,
-                    "fingerprint": "chrome"
+                    "fingerprint": "firefox"
                 },
                 "reality": {
                     "enabled": true,
@@ -3349,7 +3349,7 @@ allow-lan: true
 mode: rule
 log-level: info
 unified-delay: true
-global-client-fingerprint: chrome
+global-client-fingerprint: firefox
 dns:
   enable: false
   listen: :53
@@ -3385,7 +3385,7 @@ proxies:
   reality-opts: 
     public-key: $public_key    
     short-id: $short_id                    
-  client-fingerprint: chrome                  
+  client-fingerprint: firefox                  
 
 - name: vmess-ws-$hostname                         
   type: vmess
@@ -3434,7 +3434,7 @@ proxies:
   port: $anytls_port
   password: $uuid
   sni: $vl_name
-  client-fingerprint: chrome
+  client-fingerprint: firefox
   reality-opts:
     public-key: $public_key
     short-id: $short_id
@@ -3736,8 +3736,8 @@ fi
 green "0：返回上層"
 readp "請選擇：" menu
 if [ "$menu" = "1" ]; then
-    readp "請輸入vless-reality域名 (回車使用apple.com)：" menu
-    ym_vl_re=${menu:-apple.com}
+    readp "請輸入vless-reality域名 (回車使用www.apple.com)：" menu
+    ym_vl_re=${menu:-www.apple.com}
     
     # 構建 jq 查詢，同時更新 VLESS 和 AnyTLS 的 SNI 和 handshake server
     local query
