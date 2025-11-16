@@ -5699,13 +5699,13 @@ elif [[ $rpip = 'ipv6_only' ]]; then
 v4_6="僅IPV6出站($showv6)"
 fi
 if [[ -z $v4 ]]; then
-vps_ipv4='無IPV4'      
+vps_ipv4='無IPV4'
 vps_ipv6="$v6"
 elif [[ -n $v4 &&  -n $v6 ]]; then
-vps_ipv4="$v4"    
+vps_ipv4="$v4"
 vps_ipv6="$v6"
 else
-vps_ipv4="$v4"    
+vps_ipv4="$v4"
 vps_ipv6='無IPV6'
 fi
 echo -e "本地IPV4地址：$blue$vps_ipv4$w4$plain   本地IPV6地址：$blue$vps_ipv6$w6$plain"
